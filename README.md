@@ -153,17 +153,20 @@ had little real-world use, so please [report problems](https://github.com/nimeus
 
 Both go in `~/.claude/settings.json`. Back the file up first.
 
+Upgrading from Claude Viz: your old `~/.claude/claude-viz/` folder is moved to `~/.claude/agent-glasses/`
+automatically and the old path keeps working, so settings that name it need no changes.
+
 ### Needs-you alerts (Notification hook)
 
 Lets Agent Glasses alert you (notification, sound, yellow status bar) when a session asks for permission or
 waits for input. Copy the included script, which appends each event to a file Agent Glasses watches:
 
 ```bash
-mkdir -p ~/.claude/claude-viz
-cp scripts/notify-hook.mjs ~/.claude/claude-viz/notify-hook.mjs
+mkdir -p ~/.claude/agent-glasses
+cp scripts/notify-hook.mjs ~/.claude/agent-glasses/notify-hook.mjs
 ```
 
-(On Windows: `mkdir %USERPROFILE%\.claude\claude-viz` and copy the file there. If you installed from a
+(On Windows: `mkdir %USERPROFILE%\.claude\agent-glasses` and copy the file there. If you installed from a
 release, download `notify-hook.mjs` and `statusline.mjs` from the repository's `scripts/` folder.)
 
 Then register it:
@@ -174,7 +177,7 @@ Then register it:
     "Notification": [
       {
         "hooks": [
-          { "type": "command", "command": "node ~/.claude/claude-viz/notify-hook.mjs" }
+          { "type": "command", "command": "node ~/.claude/agent-glasses/notify-hook.mjs" }
         ]
       }
     ]
@@ -190,17 +193,17 @@ Claude Code passes your plan's 5-hour and weekly usage (`rate_limits`) to its st
 is the only documented way to read it. Copy the included script and register it:
 
 ```bash
-mkdir -p ~/.claude/claude-viz
-cp scripts/statusline.mjs ~/.claude/claude-viz/statusline.mjs
+mkdir -p ~/.claude/agent-glasses
+cp scripts/statusline.mjs ~/.claude/agent-glasses/statusline.mjs
 ```
 
 ```json
 {
-  "statusLine": { "type": "command", "command": "node ~/.claude/claude-viz/statusline.mjs" }
+  "statusLine": { "type": "command", "command": "node ~/.claude/agent-glasses/statusline.mjs" }
 }
 ```
 
-The script saves the figures to `~/.claude/claude-viz/limits.json` and prints a short line such as
+The script saves the figures to `~/.claude/agent-glasses/limits.json` and prints a short line such as
 `Opus · 5h 23% · week 41% · $1.23`. It replaces any status line you already have; to keep yours, call
 this script from it and pass the same input through. Plan usage is reported only for subscription plans.
 
@@ -276,9 +279,9 @@ and approve tools.
 ## Privacy and security
 
 - Everything stays on your machine. Agent Glasses reads `~/.claude/projects/**`, `~/.claude/settings.json`
-  and its own folder `~/.claude/claude-viz/`, and runs local commands such as `git`, `ps`/`tasklist`, `vm_stat` and
+  and its own folder `~/.claude/agent-glasses/`, and runs local commands such as `git`, `ps`/`tasklist`, `vm_stat` and
   `sysctl` (macOS).
-- It writes only to `~/.claude/claude-viz/` (archive, phone keys, events), and to Claude Code settings
+- It writes only to `~/.claude/agent-glasses/` (archive, phone keys, events), and to Claude Code settings
   when you confirm an allow rule from the Unblock coach (a backup is kept beside the file).
 - The panel renders transcript text as text, never as HTML. Secret-looking strings (API keys, bearer
   tokens, JWTs, long hex) are masked in error messages, exports and search snippets.

@@ -73,7 +73,7 @@ Both run in CI on macOS, Windows and Linux for every pull request.
   never a shell string.
 - **Never render transcript text as HTML.** Build the DOM with `textContent` (see the Markdown renderer
   in `media/view.js`). Mask secrets with `data.redact()` before showing or exporting text.
-- **Read-only by default.** Anything that writes outside `~/.claude/claude-viz/` must ask first and keep
+- **Read-only by default.** Anything that writes outside `~/.claude/agent-glasses/` must ask first and keep
   a backup. Anything that reaches the network must be off by default.
 - **Keep it fast:** the live view refreshes every 2 seconds. Read files incrementally, cache by size and
   mtime, and stream large transcripts.

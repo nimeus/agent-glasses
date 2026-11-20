@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 
-const dir = path.join(os.homedir(), '.claude', 'claude-viz');
+const dir = path.join(os.homedir(), '.claude', 'agent-glasses');
 let raw = '';
 for await (const chunk of process.stdin) raw += chunk;
 let j = {};

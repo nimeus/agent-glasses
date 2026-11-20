@@ -7,8 +7,8 @@ read-only client of the same host data.
 ```mermaid
 flowchart LR
   T[(~/.claude/projects/**.jsonl<br/>transcripts + subagents)] --> D[lib/data.js]
-  H[(~/.claude/claude-viz/events.jsonl<br/>Notification hook)] --> E[extension.js]
-  S[(~/.claude/claude-viz/limits.json<br/>status line)] --> I[lib/insights.js]
+  H[(~/.claude/agent-glasses/events.jsonl<br/>Notification hook)] --> E[extension.js]
+  S[(~/.claude/agent-glasses/limits.json<br/>status line)] --> I[lib/insights.js]
   D --> E
   I --> E
   Y[lib/system.js<br/>ps, vm_stat, sysctl] --> E

@@ -92,6 +92,11 @@ function html(webview, extUri) {
 }
 
 function activate(ctx) {
+  // One-time move of the pre-rename data folder (~/.claude/claude-viz → ~/.claude/agent-glasses), before
+  // anything reads or writes it. A failure leaves the old folder untouched.
+  const mig = require('./lib/paths').migrate();
+  if (mig.error) vscode.window.showWarningMessage(`Agent Glasses could not move ~/.claude/claude-viz to ~/.claude/agent-glasses (${mig.error}). Your data is still in the old folder.`);
+  else if (mig.kept.length) console.warn('[agent-glasses] left in ~/.claude/claude-viz because the new folder already has them:', mig.kept.join(', '));
   // Settings live under agentGlasses.*; a value still set under the old name (claudeViz.*, before the
   // rename) is honoured until the user sets the new one.
   const cfg = () => {

@@ -13,7 +13,7 @@ reads them locally and never sends them off the machine, with one exception you 
 |---|---|
 | Someone else on the Wi-Fi opens the page | Every request needs a paired device's key; unpaired requests get a 401 with no data. |
 | Pairing code is seen or guessed | 192-bit random code, single use, expires after 10 minutes; checked in constant time. Opening the link only shows a confirmation; the code is used up by tapping **Pair**. Reopening a used link redirects to the main page, which still requires a key. |
-| A device key is stolen from the server | Only SHA-256 hashes of keys are stored (`~/.claude/claude-viz/phone/devices.json`, mode 600). |
+| A device key is stolen from the server | Only SHA-256 hashes of keys are stored (`~/.claude/agent-glasses/phone/devices.json`, mode 600). |
 | A lost phone keeps access | Revoke it in **System → Phone access**; its next request gets a 401. |
 | Traffic is read on the network | HTTPS (TLS 1.2+) with an RSA-2048 certificate made by the extension itself in Node, with no external tools (key file mode 600). Compare the fingerprint shown in VS Code with the one your phone shows when you first connect. |
 | Brute force | 10 failed attempts from one address block it for 10 minutes. |

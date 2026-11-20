@@ -2,12 +2,17 @@
 
 ## Unreleased
 
+## 0.11.1
+
+- Data folder renamed to `~/.claude/agent-glasses/`. On first start the old `~/.claude/claude-viz/` is
+  moved there and a link is left at the old path, so existing status-line and hook commands, paired
+  phones and the archive keep working without changes.
+
 ## 0.11.0
 
 - **Renamed to Agent Glasses** (was Claude Viz), with a new icon, ready for the VS Code Marketplace and
   Open VSX. Settings moved from `claudeViz.*` to `agentGlasses.*`; values you set under the old names
-  keep working until you set the new ones. Data stays in `~/.claude/claude-viz/`, so paired phones,
-  the archive and the status-line and hook scripts keep working.
+  keep working until you set the new ones. Data stayed in `~/.claude/claude-viz/` (moved in 0.11.1).
 - Pinned, muted, hidden and ordered sessions start fresh, because VS Code stores them per extension id.
 - Publishing workflow for the Marketplace (Trusted Publishing) and Open VSX.
 

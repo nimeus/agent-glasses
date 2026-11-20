@@ -1,4 +1,4 @@
-// Claude Viz phone page: read-only. Polls the paired computer every 3 s while visible; builds the DOM with
+// Agent Glasses phone page: read-only. Polls the paired computer every 3 s while visible; builds the DOM with
 // createElement/textContent only, so transcript text can never run as code here.
 (() => {
   const $ = (id) => document.getElementById(id);

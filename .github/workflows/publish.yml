@@ -1,0 +1,39 @@
+# Publishes a tagged version to the VS Code Marketplace (Trusted Publishing: no stored secret, GitHub's
+# OIDC token is exchanged for a short-lived Marketplace credential) and, when the OVSX_PAT secret is set,
+# to Open VSX (Cursor, Windsurf, VSCodium).
+# The Marketplace policy (publisher → Trusted Publishing) must name: owner nimeus, repository agent-glasses,
+# workflow publish.yml, environment marketplace.
+name: Publish
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: marketplace
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - run: npx --yes @vscode/vsce@4 package -o agent-glasses.vsix
+      - name: VS Code Marketplace
+        run: npx --yes @vscode/vsce@4 publish --oidc --skip-duplicate --packagePath agent-glasses.vsix
+      - name: Open VSX
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        if: env.OVSX_PAT != ''
+        run: npx --yes ovsx@1 publish agent-glasses.vsix --skip-duplicate

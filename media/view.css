@@ -1,4 +1,4 @@
-/* Claude Viz. Colours come from the VS Code theme so the panel matches any light or dark theme.
+/* Agent Glasses. Colours come from the VS Code theme so the panel matches any light or dark theme.
    Scale: 4 / 8 / 12 / 16 / 24 px spacing; 11 / 12 / 13 / 15 px type. */
 :root{
   --fg:var(--vscode-foreground);--dim:var(--vscode-descriptionForeground);

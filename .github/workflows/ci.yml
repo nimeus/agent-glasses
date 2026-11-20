@@ -36,7 +36,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx --yes @vscode/vsce@3 package --allow-missing-repository
+      - run: npx --yes @vscode/vsce@4 package
       - uses: actions/upload-artifact@v7
         with:
           name: vsix
@@ -56,4 +56,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
-        run: gh release create "$TAG" *.vsix --repo "$GITHUB_REPOSITORY" --title "Claude Viz $TAG" --generate-notes
+        run: gh release create "$TAG" *.vsix --repo "$GITHUB_REPOSITORY" --title "Agent Glasses $TAG" --generate-notes

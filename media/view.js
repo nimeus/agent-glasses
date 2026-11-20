@@ -1,4 +1,4 @@
-// Claude Viz webview. Renders what the extension host posts; never reads files itself.
+// Agent Glasses webview. Renders what the extension host posts; never reads files itself.
 // Layout: an alert strip above four tabs — Live (running work), Today (time, cost, pacing),
 // Insights (coach, achievements, recap, failures) and System (machine, worktrees, hooks).
 (() => {
@@ -570,11 +570,11 @@
   }
   function budgetCard(b) {
     const c = card('Budget', 'at API prices');
-    c.querySelector('header').append(button(b.daily || b.monthly ? 'Change' : 'Set a budget', 'btn small ghost', 'Opens the Claude Viz budget settings', () => vscode.postMessage({ budgetSettings: true })));
+    c.querySelector('header').append(button(b.daily || b.monthly ? 'Change' : 'Set a budget', 'btn small ghost', 'Opens the Agent Glasses budget settings', () => vscode.postMessage({ budgetSettings: true })));
     const row = (label, value, cap, p) => { const r = el('div', 'lim' + (p >= 1 ? ' bad' : p >= 0.8 ? ' warn' : '')); r.append(el('span', 'ln', label), bar(cap ? p : 0), el('b', 'num', '≈' + money(value)), el('span', 'dim', cap ? 'of ' + money(cap) : 'no cap')); return r; };
     const box = el('div', 'limits'); box.append(row('Today', b.today, b.daily, b.dailyPct), row('Month', b.month, b.monthly, b.monthlyPct)); c.append(box);
     if (b.projected) c.append(el('p', null, 'At this pace the month ends around ≈' + money(b.projected) + (b.monthly ? (b.projected > b.monthly ? ', over your ' + money(b.monthly) + ' budget.' : ', within your budget.') : '.')));
-    c.append(el('p', 'foot', 'Budgets warn at 80% and 100%. Days older than 14 come from Claude Viz’s own archive.'));
+    c.append(el('p', 'foot', 'Budgets warn at 80% and 100%. Days older than 14 come from Agent Glasses’s own archive.'));
     return c;
   }
 

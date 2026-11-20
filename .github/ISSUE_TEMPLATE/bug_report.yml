@@ -27,13 +27,13 @@ body:
     id: versions
     attributes:
       label: Versions
-      description: Claude Viz, VS Code and Claude Code versions.
-      placeholder: Claude Viz 0.10.0, VS Code 1.106, Claude Code 2.3
+      description: Agent Glasses, VS Code and Claude Code versions.
+      placeholder: Agent Glasses 0.10.0, VS Code 1.106, Claude Code 2.3
     validations:
       required: true
   - type: textarea
     id: logs
     attributes:
       label: Logs
-      description: Anything relevant from Help → Toggle Developer Tools → Console, or Output → Claude Viz Phone.
+      description: Anything relevant from Help → Toggle Developer Tools → Console, or Output → Agent Glasses Phone.
       render: text

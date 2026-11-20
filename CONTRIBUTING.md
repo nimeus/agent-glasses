@@ -1,12 +1,12 @@
-# Contributing to Claude Viz
+# Contributing to Agent Glasses
 
-Thanks for helping. Claude Viz is a small, dependency-light VS Code extension; this page covers how to
+Thanks for helping. Agent Glasses is a small, dependency-light VS Code extension; this page covers how to
 run it, test it and send a change.
 
 ## Ways to help
 
-- **Report a bug:** open an [issue](https://github.com/nimeus/claude-viz/issues/new/choose) with your OS,
-  VS Code version, Claude Viz version and what you saw. Reports from **Windows and Linux** are especially
+- **Report a bug:** open an [issue](https://github.com/nimeus/agent-glasses/issues/new/choose) with your OS,
+  VS Code version, Agent Glasses version and what you saw. Reports from **Windows and Linux** are especially
   useful: those platforms have had little real-world use.
 - **Suggest a feature:** open an issue first, so we can agree on it before you write code.
 - **Fix something:** pick an issue (say you are taking it) or send a small pull request directly.
@@ -19,20 +19,20 @@ through private reporting, see [docs/SECURITY.md](docs/SECURITY.md#reporting).
 Needs Node.js 20+, git and VS Code.
 
 ```bash
-git clone https://github.com/<you>/claude-viz.git
-cd claude-viz
+git clone https://github.com/<you>/agent-glasses.git
+cd agent-glasses
 npm ci
 code .
 ```
 
-Press **F5** (or **Run → Start Debugging**, "Run Claude Viz"). A second VS Code window, the Extension
+Press **F5** (or **Run → Start Debugging**, "Run Agent Glasses"). A second VS Code window, the Extension
 Development Host, opens with your copy loaded. It reads the real transcripts in `~/.claude/projects`, so
 you see your own sessions. After editing:
 
 - `extension.js` or `lib/*`: restart the debug session (⇧⌘F5 / Ctrl+Shift+F5).
 - `media/*` (the panel): run **Developer: Reload Webviews** in the development window.
 
-To try a packaged build: `npm run package`, then `code --install-extension claude-viz-<version>.vsix`.
+To try a packaged build: `npm run package`, then `code --install-extension agent-glasses-<version>.vsix`.
 Bump `version` in `package.json` first, or VS Code keeps the old copy loaded.
 
 ## Project layout
@@ -94,5 +94,8 @@ By contributing you agree that your work is released under the [MIT License](LIC
 ## Releases (maintainer)
 
 Bump `version` in `package.json`, move **Unreleased** in the changelog under the new version, commit,
-then tag and push: `git tag v<version> && git push --tags`. CI packages the `.vsix` and attaches it to a
-GitHub release.
+then tag and push: `git tag v<version> && git push origin v<version>`. Two workflows run on the tag:
+
+- `ci.yml` tests on three platforms, packages the `.vsix` and attaches it to a GitHub release.
+- `publish.yml` publishes to the VS Code Marketplace with Trusted Publishing (no stored secret) and, when
+  the `OVSX_PAT` secret is set, to Open VSX. It runs in the `marketplace` environment.

@@ -7,3 +7,4 @@ scripts/check.mjs
 tests/**
 .gitignore
 CONTRIBUTING.md
+media/icon-marketplace.svg

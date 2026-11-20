@@ -1,4 +1,4 @@
-// Claude Viz — extension host: polls Claude Code transcripts, feeds the sidebar view and the editor panel,
+// Agent Glasses — extension host: polls Claude Code transcripts, feeds the sidebar view and the editor panel,
 // raises alerts. Everything it reads is local and read-only, except the Notification-hook log it trims.
 const vscode = require('vscode');
 const fs = require('fs');
@@ -86,13 +86,19 @@ function html(webview, extUri) {
   const media = (f) => webview.asWebviewUri(vscode.Uri.joinPath(extUri, 'media', f));
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
-<link rel="stylesheet" href="${media('view.css')}"><title>Claude Viz</title></head><body>
+<link rel="stylesheet" href="${media('view.css')}"><title>Agent Glasses</title></head><body>
 <div id="top"><nav id="tabs" role="tablist" aria-label="Views"></nav><div id="alerts" aria-live="polite"></div><div id="search"><input id="q" type="search" placeholder="Filter running sessions, search the last 7 days" aria-label="Filter running sessions and search past ones"></div></div><main id="view" role="tabpanel"></main>
 <script nonce="${nonce}" src="${media('view.js')}"></script></body></html>`;
 }
 
 function activate(ctx) {
-  const cfg = () => vscode.workspace.getConfiguration('claudeViz');
+  // Settings live under agentGlasses.*; a value still set under the old name (claudeViz.*, before the
+  // rename) is honoured until the user sets the new one.
+  const cfg = () => {
+    const now = vscode.workspace.getConfiguration('agentGlasses'), old = vscode.workspace.getConfiguration('claudeViz');
+    const isSet = (c, k) => { const i = c.inspect(k); return !!i && [i.globalValue, i.workspaceValue, i.workspaceFolderValue].some((v) => v !== undefined); };
+    return { get: (k, d) => (!isSet(now, k) && isSet(old, k) ? old.get(k, d) : now.get(k, d)) };
+  };
   const views = new Set();
   const needs = new Map();
   const prev = new Map();
@@ -132,7 +138,7 @@ function activate(ctx) {
   };
 
   const bar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-  bar.command = 'claudeViz.sidebar.focus';
+  bar.command = 'agentGlasses.sidebar.focus';
   bar.show();
   ctx.subscriptions.push(bar);
 
@@ -170,7 +176,7 @@ function activate(ctx) {
       note('needs', known || { id: e.session_id, project: '', title: '' }, msg);
       if (muted.has(e.session_id)) continue;
       ding();
-      vscode.window.showWarningMessage(`Claude: ${msg}`, 'Show').then((a) => a && vscode.commands.executeCommand('claudeViz.sidebar.focus'));
+      vscode.window.showWarningMessage(`Claude: ${msg}`, 'Show').then((a) => a && vscode.commands.executeCommand('agentGlasses.sidebar.focus'));
     }
     try { last = data.snapshot(needs, cfg().get('contextWindow', 1_000_000), pinned); } catch { /* transcript mid-write; next tick */ }
     const pos = (id) => { const i = order.indexOf(id); return i < 0 ? Infinity : i; };
@@ -256,7 +262,7 @@ function activate(ctx) {
           if (!cap) continue;
           for (const level of [1, 0.8]) if (p >= level && !said[`${kind}:${key}:${level}`]) {
             said[`${kind}:${key}:${level}`] = 1;
-            vscode.window.showWarningMessage(`Claude Viz: ${level === 1 ? 'over' : '80% of'} your ${kind} budget ($${cap}): ≈$${(kind === 'daily' ? bud.today : bud.month).toFixed(2)} at API prices.`);
+            vscode.window.showWarningMessage(`Agent Glasses: ${level === 1 ? 'over' : '80% of'} your ${kind} budget ($${cap}): ≈$${(kind === 'daily' ? bud.today : bud.month).toFixed(2)} at API prices.`);
             break;
           }
         }
@@ -309,11 +315,11 @@ function activate(ctx) {
   };
 
   const openSummary = async () => {
-    if (!stats) { vscode.window.showInformationMessage("Claude Viz is still reading today's activity. Try again in a moment."); return; }
+    if (!stats) { vscode.window.showInformationMessage("Agent Glasses is still reading today's activity. Try again in a moment."); return; }
     const doc = await vscode.workspace.openTextDocument({ language: 'markdown', content: summaryMarkdown(stats, wt) });
     vscode.window.showTextDocument(doc, { preview: false });
   };
-  ctx.subscriptions.push(vscode.commands.registerCommand('claudeViz.summary', openSummary));
+  ctx.subscriptions.push(vscode.commands.registerCommand('agentGlasses.summary', openSummary));
 
   ctx.subscriptions.push(vscode.window.onDidChangeWindowState((w) => {
     if (!w.focused) { awaySince = Date.now(); return; }
@@ -324,7 +330,7 @@ function activate(ctx) {
     away = { since, items };
     const count = (k) => items.filter((e) => e.kind === k).length;
     const parts = [count('finished') && `${count('finished')} finished`, count('needs') && `${count('needs')} need you`, count('stuck') && `${count('stuck')} may be stuck`, count('limit') && 'usage limit hit'].filter(Boolean);
-    vscode.window.showInformationMessage(`While you were away: ${parts.join(', ')}.`, 'Show').then((a) => a && vscode.commands.executeCommand('claudeViz.sidebar.focus'));
+    vscode.window.showInformationMessage(`While you were away: ${parts.join(', ')}.`, 'Show').then((a) => a && vscode.commands.executeCommand('agentGlasses.sidebar.focus'));
     post();
   }));
 
@@ -342,7 +348,7 @@ function activate(ctx) {
       hist.mem.push(sys.memUsedGb / sys.memTotalGb);
       for (const k of ['cpu', 'mem']) if (hist[k].length > 36) hist[k].shift();
       sys.hist = hist;
-      if (sys.level === 'bad' && before !== 'bad') vscode.window.showWarningMessage(`Claude Viz: machine under pressure (agents ${sys.agents}/${sys.cap}, disk ${Math.round(sys.diskFreeGb ?? 0)} GB free, swap ${(sys.swapUsedGb ?? 0).toFixed(1)} GB, memory ${sys.memFreePct ?? '?'}% available).`);
+      if (sys.level === 'bad' && before !== 'bad') vscode.window.showWarningMessage(`Agent Glasses: machine under pressure (agents ${sys.agents}/${sys.cap}, disk ${Math.round(sys.diskFreeGb ?? 0)} GB free, swap ${(sys.swapUsedGb ?? 0).toFixed(1)} GB, memory ${sys.memFreePct ?? '?'}% available).`);
     } catch { /* next sample */ } finally { sampling = false; }
   };
   const sampler = setInterval(sample, 5000);
@@ -396,10 +402,10 @@ function activate(ctx) {
       turns: d.turns.filter((x) => x.text).sort((a, b) => b.ts - a.ts).slice(0, 40).map((x) => ({ ts: x.ts, dur: x.dur, tools: x.tools, cost: x.total, text: trim(x.text, 600) })),
       tools: d.tools.slice(0, 12).map((x) => ({ name: x.name, calls: x.calls, failed: x.failed })), subagents: d.subagents.slice(0, 20).map((a) => ({ name: a.name, type: a.type, calls: a.calls, cost: a.cost })) };
   };
-  const phoneLog = vscode.window.createOutputChannel('Claude Viz Phone');
+  const phoneLog = vscode.window.createOutputChannel('Agent Glasses Phone');
   ctx.subscriptions.push(phoneLog);
   const phoneBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
-  phoneBar.command = 'claudeViz.phone.toggle';
+  phoneBar.command = 'agentGlasses.phone.toggle';
   ctx.subscriptions.push(phoneBar);
   phoneSvc = phone.create({
     mediaDir: path.join(ctx.extensionPath, 'media'), state: phoneState, history: phoneHistory, session: phoneSession,
@@ -412,7 +418,7 @@ function activate(ctx) {
   });
   ctx.subscriptions.push({ dispose: () => { phoneSvc.stop(false); } });
   const phoneOn = () => phoneSvc.start(cfg().get('phone.port', 7843), Math.max(0.25, Math.min(24, cfg().get('phone.autoOffHours', 4)))).then((st) => { if (st.error) vscode.window.showWarningMessage('Phone access: ' + st.error); });
-  ctx.subscriptions.push(vscode.commands.registerCommand('claudeViz.phone.toggle', () => (phoneSvc.status().on ? phoneSvc.stop(true) : phoneOn())));
+  ctx.subscriptions.push(vscode.commands.registerCommand('agentGlasses.phone.toggle', () => (phoneSvc.status().on ? phoneSvc.stop(true) : phoneOn())));
 
   /** Remote Control: a terminal running Claude Code so the session also appears in the Claude phone app. */
   const remoteTerminal = (cwd, args, name) => {
@@ -535,7 +541,7 @@ function activate(ctx) {
         if (sess.running) vscode.window.showWarningMessage('This session is still working. Continue it on the phone after it finishes, so two Claude processes do not write the same conversation.');
         else remoteTerminal(sess.cwd, ['--resume', sess.id, '--remote-control', (sess.title || sess.project || 'session').replace(/[^\w .-]/g, '').slice(0, 40) || 'session'], sess.title || sess.project);
       }
-      if (m?.budgetSettings) vscode.commands.executeCommand('workbench.action.openSettings', 'claudeViz.budget');
+      if (m?.budgetSettings) vscode.commands.executeCommand('workbench.action.openSettings', 'agentGlasses.budget');
       if (typeof m?.openFileOf === 'string') { const f = sessionInsight.locate(m.openFileOf); if (f) vscode.window.showTextDocument(vscode.Uri.file(f), { preview: true }); }
       // Folder and entrypoint come from the analysis, never from the message.
       const known = typeof m?.copyResume === 'string' ? analyzed.get(m.copyResume) : typeof m?.showById === 'string' ? analyzed.get(m.showById) : null;
@@ -553,14 +559,14 @@ function activate(ctx) {
     return () => { views.delete(webview); sub.dispose(); };
   };
 
-  ctx.subscriptions.push(vscode.window.registerWebviewViewProvider('claudeViz.sidebar', {
+  ctx.subscriptions.push(vscode.window.registerWebviewViewProvider('agentGlasses.sidebar', {
     resolveWebviewView(view) { const done = setup(view.webview); view.onDidDispose(done); },
   }, { webviewOptions: { retainContextWhenHidden: true } }));
 
   let panel;
-  ctx.subscriptions.push(vscode.commands.registerCommand('claudeViz.open', () => {
+  ctx.subscriptions.push(vscode.commands.registerCommand('agentGlasses.open', () => {
     if (panel) return panel.reveal();
-    panel = vscode.window.createWebviewPanel('claudeViz', 'Claude Viz', vscode.ViewColumn.Beside, { enableScripts: true, retainContextWhenHidden: true });
+    panel = vscode.window.createWebviewPanel('agentGlasses', 'Agent Glasses', vscode.ViewColumn.Beside, { enableScripts: true, retainContextWhenHidden: true });
     const done = setup(panel.webview);
     panel.onDidDispose(() => { done(); panel = undefined; });
   }));

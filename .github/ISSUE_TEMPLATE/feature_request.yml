@@ -1,5 +1,5 @@
 name: Feature request
-description: An idea for something Claude Viz should show or do.
+description: An idea for something Agent Glasses should show or do.
 labels: [enhancement]
 body:
   - type: textarea
@@ -16,4 +16,4 @@ body:
     id: data
     attributes:
       label: Where the data would come from
-      description: Optional. Claude Viz only reads local files Claude Code writes; if you know which transcript field holds it, say so.
+      description: Optional. Agent Glasses only reads local files Claude Code writes; if you know which transcript field holds it, say so.

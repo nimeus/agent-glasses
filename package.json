@@ -1,8 +1,8 @@
 {
-  "name": "claude-viz",
-  "displayName": "Claude Viz",
-  "version": "0.10.0",
-  "publisher": "local",
+  "name": "agent-glasses",
+  "displayName": "Agent Glasses",
+  "version": "0.11.0",
+  "publisher": "nimeus",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -13,68 +13,68 @@
   "contributes": {
     "commands": [
       {
-        "command": "claudeViz.open",
-        "title": "Claude Viz: Open in Editor"
+        "command": "agentGlasses.open",
+        "title": "Agent Glasses: Open in Editor"
       },
       {
-        "command": "claudeViz.summary",
-        "title": "Claude Viz: Open Today's Summary"
+        "command": "agentGlasses.summary",
+        "title": "Agent Glasses: Open Today's Summary"
       },
       {
-        "command": "claudeViz.phone.toggle",
-        "title": "Claude Viz: Turn Phone Access On/Off"
+        "command": "agentGlasses.phone.toggle",
+        "title": "Agent Glasses: Turn Phone Access On/Off"
       }
     ],
     "configuration": {
-      "title": "Claude Viz",
+      "title": "Agent Glasses",
       "properties": {
-        "claudeViz.notifyOnFinish": {
+        "agentGlasses.notifyOnFinish": {
           "type": "boolean",
           "default": true,
           "description": "Show a notification when a Claude Code session finishes its turn."
         },
-        "claudeViz.sound": {
+        "agentGlasses.sound": {
           "type": "boolean",
           "default": true,
           "description": "Play a sound when a Claude Code session needs your permission or input."
         },
-        "claudeViz.contextWindow": {
+        "agentGlasses.contextWindow": {
           "type": "number",
           "default": 1000000,
           "minimum": 1000,
           "description": "Context window, in tokens, the context gauge measures against."
         },
-        "claudeViz.diskWarnGb": {
+        "agentGlasses.diskWarnGb": {
           "type": "number",
           "default": 30,
           "minimum": 1,
           "description": "Warn when free disk space drops below this many GB (red below two thirds of it)."
         },
-        "claudeViz.celebrate": {
+        "agentGlasses.celebrate": {
           "type": "boolean",
           "default": true,
           "description": "Briefly celebrate real outcomes: a commit landing, tests going green again, a subagent finishing cleanly, an achievement."
         },
-        "claudeViz.budget.dailyUsd": {
+        "agentGlasses.budget.dailyUsd": {
           "type": "number",
           "default": 0,
           "minimum": 0,
           "description": "Daily budget in USD at API prices (0 = off). Warns at 80% and 100%."
         },
-        "claudeViz.budget.monthlyUsd": {
+        "agentGlasses.budget.monthlyUsd": {
           "type": "number",
           "default": 0,
           "minimum": 0,
           "description": "Monthly budget in USD at API prices (0 = off). Warns at 80% and 100%."
         },
-        "claudeViz.phone.port": {
+        "agentGlasses.phone.port": {
           "type": "number",
           "default": 7843,
           "minimum": 1024,
           "maximum": 65535,
           "description": "Port for phone access (HTTPS on your Wi-Fi address only)."
         },
-        "claudeViz.phone.autoOffHours": {
+        "agentGlasses.phone.autoOffHours": {
           "type": "number",
           "default": 4,
           "minimum": 0.25,
@@ -86,34 +86,34 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "claudeViz",
-          "title": "Claude Viz",
+          "id": "agentGlasses",
+          "title": "Agent Glasses",
           "icon": "media/icon.svg"
         }
       ]
     },
     "views": {
-      "claudeViz": [
+      "agentGlasses": [
         {
           "type": "webview",
-          "id": "claudeViz.sidebar",
+          "id": "agentGlasses.sidebar",
           "name": "Sessions"
         }
       ]
     }
   },
-  "description": "Live view of running Claude Code sessions and subagents: costs, limits, insights, history and a read-only phone page.",
+  "description": "See what your Claude Code agents are doing: live sessions and subagents, costs, usage limits, insights, history and a read-only phone page.",
   "dependencies": {
     "qrcode-generator": "2.0.4"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nimeus/claude-viz.git"
+    "url": "https://github.com/nimeus/agent-glasses.git"
   },
-  "homepage": "https://github.com/nimeus/claude-viz#readme",
+  "homepage": "https://github.com/nimeus/agent-glasses#readme",
   "bugs": {
-    "url": "https://github.com/nimeus/claude-viz/issues"
+    "url": "https://github.com/nimeus/agent-glasses/issues"
   },
   "keywords": [
     "claude",
@@ -131,6 +131,11 @@
   "scripts": {
     "check": "node scripts/check.mjs",
     "test": "node --test tests/*.test.cjs",
-    "package": "npx @vscode/vsce package --allow-missing-repository"
+    "package": "npx @vscode/vsce package"
+  },
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#FFC83D",
+    "theme": "light"
   }
 }

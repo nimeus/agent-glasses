@@ -1,13 +1,15 @@
-# Claude Viz
+<img src="https://raw.githubusercontent.com/nimeus/agent-glasses/main/media/icon.png" width="96" alt="">
+
+# Agent Glasses
 
 A VS Code extension that shows what [Claude Code](https://code.claude.com) is doing, live: every running
 session and subagent, what each one is working on, what it costs, how close you are to your usage limits,
 and where your time and tokens go. It also has a read-only phone page for checking on sessions from
 another device on your Wi-Fi.
 
-> Unofficial. Not affiliated with or endorsed by Anthropic.
+> Works with Claude Code. Unofficial: not affiliated with or endorsed by Anthropic. Formerly "Claude Viz".
 
-Claude Viz reads the files Claude Code already writes on your computer (`~/.claude/projects/**`). It runs
+Agent Glasses reads the files Claude Code already writes on your computer (`~/.claude/projects/**`). It runs
 on macOS, Windows and Linux. It sends
 nothing anywhere: no telemetry, no network calls, except the optional phone page, which serves your own
 devices on your own network.
@@ -29,7 +31,7 @@ devices on your own network.
 
 ## What you get
 
-Claude Viz adds an icon to the Activity Bar. Its panel has five tabs, an alert strip above them, and a
+Agent Glasses adds an icon to the Activity Bar. Its panel has five tabs, an alert strip above them, and a
 status-bar item that turns yellow when a session needs you.
 
 ### Live
@@ -94,30 +96,38 @@ worktrees, never with `--force`), hook errors, and [phone access](#phone-access)
 
 Requirements: VS Code 1.90 or later, and Claude Code (the CLI or the VS Code extension).
 
-### From a release (recommended)
+### From the Marketplace (recommended)
 
-1. Download `claude-viz-<version>.vsix` from the
-   [latest release](https://github.com/nimeus/claude-viz/releases/latest).
+- **VS Code:** open the Extensions view, search for **Agent Glasses** and press **Install**, or run
+  `code --install-extension nimeus.agent-glasses`.
+- **Cursor, Windsurf, VSCodium:** install **Agent Glasses** from their extension view (Open VSX).
+
+### From a release
+
+
+1. Download `agent-glasses-<version>.vsix` from the
+   [latest release](https://github.com/nimeus/agent-glasses/releases/latest).
 2. Install it, either:
    - in VS Code: **Extensions** view → `⋯` menu → **Install from VSIX…** → pick the file; or
-   - in a terminal: `code --install-extension claude-viz-<version>.vsix`
-3. Reload VS Code (**Developer: Reload Window**). The Claude Viz icon appears in the Activity Bar.
+   - in a terminal: `code --install-extension agent-glasses-<version>.vsix`
+3. Reload VS Code (**Developer: Reload Window**). The Agent Glasses icon appears in the Activity Bar.
 
 The same file works on macOS, Windows and Linux. To update, install the newer `.vsix` the same way.
+Marketplace installs update by themselves.
 
 ### From source
 
 Needs Node.js 20 or later and git.
 
 ```bash
-git clone https://github.com/nimeus/claude-viz.git
-cd claude-viz
+git clone https://github.com/nimeus/agent-glasses.git
+cd agent-glasses
 npm ci
-npm run package          # writes claude-viz-<version>.vsix
-code --install-extension claude-viz-*.vsix
+npm run package          # writes agent-glasses-<version>.vsix
+code --install-extension agent-glasses-*.vsix
 ```
 
-On Windows PowerShell, use the full file name instead of `claude-viz-*.vsix`.
+On Windows PowerShell, use the full file name instead of `agent-glasses-*.vsix`.
 
 If `code` is not found: in VS Code run **Shell Command: Install 'code' command in PATH** (macOS), or
 reinstall VS Code with "Add to PATH" checked (Windows).
@@ -137,7 +147,7 @@ more.
 | Copied `claude --resume` command | zsh/bash | PowerShell | bash |
 
 Day-to-day use is on macOS. Windows and Linux support is written and unit-tested with sample data but has
-had little real-world use, so please [report problems](https://github.com/nimeus/claude-viz/issues).
+had little real-world use, so please [report problems](https://github.com/nimeus/agent-glasses/issues).
 
 ## Optional setup
 
@@ -145,8 +155,8 @@ Both go in `~/.claude/settings.json`. Back the file up first.
 
 ### Needs-you alerts (Notification hook)
 
-Lets Claude Viz alert you (notification, sound, yellow status bar) when a session asks for permission or
-waits for input. Copy the included script, which appends each event to a file Claude Viz watches:
+Lets Agent Glasses alert you (notification, sound, yellow status bar) when a session asks for permission or
+waits for input. Copy the included script, which appends each event to a file Agent Glasses watches:
 
 ```bash
 mkdir -p ~/.claude/claude-viz
@@ -198,7 +208,7 @@ this script from it and pass the same input through. Plan usage is reported only
 
 A read-only copy of the panel for your phone, served by the extension on your Wi-Fi.
 
-1. In **System → Phone access**, press **Turn on** (or run **Claude Viz: Turn Phone Access On/Off**).
+1. In **System → Phone access**, press **Turn on** (or run **Agent Glasses: Turn Phone Access On/Off**).
 2. Press **Pair a device** and scan the QR code with your phone's camera.
 3. Your phone warns that the certificate is not trusted, because it is a self-made certificate for this
    computer. Check that its fingerprint matches the one shown in VS Code, then continue.
@@ -209,7 +219,7 @@ prompts, tools and subagents. It refreshes every 3 seconds while open.
 
 How it is protected (details in [docs/SECURITY.md](docs/SECURITY.md)):
 
-- Off by default; turns itself off after 4 hours (`claudeViz.phone.autoOffHours`).
+- Off by default; turns itself off after 4 hours (`agentGlasses.phone.autoOffHours`).
 - Listens only on your computer's private Wi-Fi/Ethernet addresses: not on localhost, a VPN tunnel or
   `0.0.0.0`.
 - HTTPS with a certificate made on your computer.
@@ -229,21 +239,21 @@ and approve tools.
 
 | Setting | Default | What it does |
 |---|---|---|
-| `claudeViz.notifyOnFinish` | `true` | Notify when a session finishes its turn. |
-| `claudeViz.sound` | `true` | Play a sound when a session needs you. |
-| `claudeViz.celebrate` | `true` | Brief message when a commit lands, tests turn green again, a subagent finishes cleanly or you earn an achievement. |
-| `claudeViz.contextWindow` | `1000000` | Context window size the context gauge measures against. |
-| `claudeViz.diskWarnGb` | `30` | Warn below this much free disk (red below two thirds of it). |
-| `claudeViz.budget.dailyUsd` | `0` (off) | Daily budget at API prices; warns at 80% and 100%. |
-| `claudeViz.budget.monthlyUsd` | `0` (off) | Monthly budget at API prices; warns at 80% and 100%. |
-| `claudeViz.phone.port` | `7843` | Port for phone access. |
-| `claudeViz.phone.autoOffHours` | `4` | Phone access turns itself off after this many hours. |
+| `agentGlasses.notifyOnFinish` | `true` | Notify when a session finishes its turn. |
+| `agentGlasses.sound` | `true` | Play a sound when a session needs you. |
+| `agentGlasses.celebrate` | `true` | Brief message when a commit lands, tests turn green again, a subagent finishes cleanly or you earn an achievement. |
+| `agentGlasses.contextWindow` | `1000000` | Context window size the context gauge measures against. |
+| `agentGlasses.diskWarnGb` | `30` | Warn below this much free disk (red below two thirds of it). |
+| `agentGlasses.budget.dailyUsd` | `0` (off) | Daily budget at API prices; warns at 80% and 100%. |
+| `agentGlasses.budget.monthlyUsd` | `0` (off) | Monthly budget at API prices; warns at 80% and 100%. |
+| `agentGlasses.phone.port` | `7843` | Port for phone access. |
+| `agentGlasses.phone.autoOffHours` | `4` | Phone access turns itself off after this many hours. |
 
 | Command | |
 |---|---|
-| **Claude Viz: Open in Editor** | Opens the panel in an editor tab instead of the sidebar. |
-| **Claude Viz: Open Today's Summary** | Today's work as an unsaved Markdown document. |
-| **Claude Viz: Turn Phone Access On/Off** | Starts or stops the phone page. |
+| **Agent Glasses: Open in Editor** | Opens the panel in an editor tab instead of the sidebar. |
+| **Agent Glasses: Open Today's Summary** | Today's work as an unsaved Markdown document. |
+| **Agent Glasses: Turn Phone Access On/Off** | Starts or stops the phone page. |
 
 ## How the numbers are worked out
 
@@ -265,7 +275,7 @@ and approve tools.
 
 ## Privacy and security
 
-- Everything stays on your machine. Claude Viz reads `~/.claude/projects/**`, `~/.claude/settings.json`
+- Everything stays on your machine. Agent Glasses reads `~/.claude/projects/**`, `~/.claude/settings.json`
   and its own folder `~/.claude/claude-viz/`, and runs local commands such as `git`, `ps`/`tasklist`, `vm_stat` and
   `sysctl` (macOS).
 - It writes only to `~/.claude/claude-viz/` (archive, phone keys, events), and to Claude Code settings
@@ -291,8 +301,8 @@ and approve tools.
 | Panel looks unchanged after an update | Reload the window; if it persists, quit VS Code completely and reopen. |
 | Limits say "est." | Set up the [status line](#plan-usage-status-line) and start a new Claude Code session. |
 | No needs-you alerts | Add the [Notification hook](#needs-you-alerts-notification-hook); it applies to new sessions. |
-| Phone: "Pairing code not valid" | Press **New code** in VS Code and scan again. The reason is logged in **Output → Claude Viz Phone**. |
-| Phone access won't start | Connect to Wi-Fi or Ethernet; if the port is taken, change `claudeViz.phone.port`. |
+| Phone: "Pairing code not valid" | Press **New code** in VS Code and scan again. The reason is logged in **Output → Agent Glasses Phone**. |
+| Phone access won't start | Connect to Wi-Fi or Ethernet; if the port is taken, change `agentGlasses.phone.port`. |
 | Phone can't reach the page (Windows/Linux) | Allow the port (default 7843) in the firewall for private networks only. |
 
 ## Development

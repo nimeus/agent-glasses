@@ -1,6 +1,6 @@
 # Architecture
 
-Claude Viz has two halves: the **extension host** (Node.js inside VS Code) reads files and runs local
+Agent Glasses has two halves: the **extension host** (Node.js inside VS Code) reads files and runs local
 commands; the **webview** (the panel) only renders what the host posts to it. The phone page is a third,
 read-only client of the same host data.
 

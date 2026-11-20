@@ -1,8 +1,8 @@
 # Security
 
-## What Claude Viz can reach
+## What Agent Glasses can reach
 
-Transcripts can contain source code, file contents and secrets that passed through a tool. Claude Viz
+Transcripts can contain source code, file contents and secrets that passed through a tool. Agent Glasses
 reads them locally and never sends them off the machine, with one exception you control: phone access.
 
 ## Phone access: threat model
@@ -17,7 +17,7 @@ reads them locally and never sends them off the machine, with one exception you 
 | A lost phone keeps access | Revoke it in **System → Phone access**; its next request gets a 401. |
 | Traffic is read on the network | HTTPS (TLS 1.2+) with an RSA-2048 certificate made by the extension itself in Node, with no external tools (key file mode 600). Compare the fingerprint shown in VS Code with the one your phone shows when you first connect. |
 | Brute force | 10 failed attempts from one address block it for 10 minutes. |
-| The service is left running | Off by default; turns itself off after `claudeViz.phone.autoOffHours` (default 4). |
+| The service is left running | Off by default; turns itself off after `agentGlasses.phone.autoOffHours` (default 4). |
 | Exposure beyond the LAN | Binds only to private IPv4 addresses (10/8, 172.16/12, 192.168/16) on physical interfaces; loopback, VPN, virtual-machine and container adapters are skipped (macOS, Linux and Windows names). Never `0.0.0.0`. On Windows and Linux, allow the port in the firewall for private networks only. Nothing is forwarded to the internet. |
 | The page is abused to change things | GET only (others get 405); the API has no write endpoints. |
 | Cross-site attacks against the page | Key cookie is `HttpOnly; Secure; SameSite=Strict`. Responses send a strict Content-Security-Policy (`default-src 'none'`, scripts only from the page itself), `X-Frame-Options: DENY`, `no-store`, `nosniff`, `no-referrer`. |
@@ -30,7 +30,7 @@ can read the transcripts directly anyway.
 ## Other actions that change things
 
 - **Unblock coach** adds a permission rule only after a confirmation that names the rule and the file,
-  and keeps a backup (`*.bak-claude-viz`). Broad commands (`rm`, `sudo`, `git push`, bare interpreters…)
+  and keeps a backup (`*.bak-agent-glasses`). Broad commands (`rm`, `sudo`, `git push`, bare interpreters…)
   are offered as copy-only.
 - **Worktree cleaner** removes only agent worktrees (`.claude/worktrees/*`) that are clean, merged and
   unlocked, re-checks just before removing, and uses `git worktree remove` without `--force`; branches are

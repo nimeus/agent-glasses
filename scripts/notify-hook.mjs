@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Claude Viz Notification hook. Claude Code pipes each notification (permission prompt, waiting for input)
+// Agent Glasses Notification hook. Claude Code pipes each notification (permission prompt, waiting for input)
 // here as JSON; this appends it as one line to ~/.claude/claude-viz/events.jsonl, which the extension watches.
 // Pure Node, so it works the same on macOS, Linux and Windows.
 import fs from 'node:fs';

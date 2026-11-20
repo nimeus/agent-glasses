@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Claude Viz status line. Claude Code pipes its status JSON here on each update. This saves the plan
+// Agent Glasses status line. Claude Code pipes its status JSON here on each update. This saves the plan
 // limits (rate_limits) and the session's cost for the VS Code extension, then prints a short line.
 import fs from 'node:fs';
 import path from 'node:path';

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex">
+<title>Claude Viz</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="pulse" aria-hidden="true"></span><b>Claude Viz</b><span id="dev" class="dim"></span></div>
+  <nav class="tabs" role="tablist" aria-label="Views">
+    <button role="tab" data-tab="live" aria-selected="true">Live</button>
+    <button role="tab" data-tab="today" aria-selected="false">Today</button>
+    <button role="tab" data-tab="history" aria-selected="false">History</button>
+  </nav>
+</header>
+<div id="alerts" aria-live="polite"></div>
+<main id="view" role="tabpanel"><p class="empty">Loading…</p></main>
+<div id="sheet" class="sheet" hidden role="dialog" aria-modal="true" aria-label="Session details"></div>
+<script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+{
+  "name": "claude-viz",
+  "displayName": "Claude Viz",
+  "version": "0.9.4",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "main": "extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "claudeViz.open",
+        "title": "Claude Viz: Open in Editor"
+      },
+      {
+        "command": "claudeViz.summary",
+        "title": "Claude Viz: Open Today's Summary"
+      },
+      {
+        "command": "claudeViz.phone.toggle",
+        "title": "Claude Viz: Turn Phone Access On/Off"
+      }
+    ],
+    "configuration": {
+      "title": "Claude Viz",
+      "properties": {
+        "claudeViz.notifyOnFinish": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a notification when a Claude Code session finishes its turn."
+        },
+        "claudeViz.sound": {
+          "type": "boolean",
+          "default": true,
+          "description": "Play a sound (macOS) when a Claude Code session needs your permission or input."
+        },
+        "claudeViz.contextWindow": {
+          "type": "number",
+          "default": 1000000,
+          "minimum": 1000,
+          "description": "Context window, in tokens, the context gauge measures against."
+        },
+        "claudeViz.diskWarnGb": {
+          "type": "number",
+          "default": 30,
+          "minimum": 1,
+          "description": "Warn when free disk space drops below this many GB (red below two thirds of it)."
+        },
+        "claudeViz.celebrate": {
+          "type": "boolean",
+          "default": true,
+          "description": "Briefly celebrate real outcomes: a commit landing, tests going green again, a subagent finishing cleanly, an achievement."
+        },
+        "claudeViz.budget.dailyUsd": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "description": "Daily budget in USD at API prices (0 = off). Warns at 80% and 100%."
+        },
+        "claudeViz.budget.monthlyUsd": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "description": "Monthly budget in USD at API prices (0 = off). Warns at 80% and 100%."
+        },
+        "claudeViz.phone.port": {
+          "type": "number",
+          "default": 7843,
+          "minimum": 1024,
+          "maximum": 65535,
+          "description": "Port for phone access (HTTPS on your Wi-Fi address only)."
+        },
+        "claudeViz.phone.autoOffHours": {
+          "type": "number",
+          "default": 4,
+          "minimum": 0.25,
+          "maximum": 24,
+          "description": "Phone access turns itself off after this many hours."
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "claudeViz",
+          "title": "Claude Viz",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "claudeViz": [
+        {
+          "type": "webview",
+          "id": "claudeViz.sidebar",
+          "name": "Sessions"
+        }
+      ]
+    }
+  },
+  "description": "Live view of running Claude Code sessions and subagents: costs, limits, insights, history and a read-only phone page.",
+  "dependencies": {
+    "qrcode-generator": "2.0.4"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nimeus/claude-viz.git"
+  },
+  "homepage": "https://github.com/nimeus/claude-viz#readme",
+  "bugs": {
+    "url": "https://github.com/nimeus/claude-viz/issues"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "ai",
+    "agents",
+    "usage",
+    "cost",
+    "monitoring"
+  ],
+  "categories": [
+    "Visualization",
+    "Other"
+  ]
+}

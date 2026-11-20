@@ -1,0 +1,19 @@
+name: Feature request
+description: An idea for something Claude Viz should show or do.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would it solve?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you have in mind
+  - type: textarea
+    id: data
+    attributes:
+      label: Where the data would come from
+      description: Optional. Claude Viz only reads local files Claude Code writes; if you know which transcript field holds it, say so.

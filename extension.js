@@ -16,13 +16,20 @@ const exporter = require('./lib/export');
 const git = require('./lib/git');
 const phone = require('./lib/phone');
 
-const CODE_CLI = '/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code';
+const WIN = process.platform === 'win32';
+/** Paths compare case-insensitively on Windows (drive letters, folders). */
+const norm = (p) => { const n = path.normalize(String(p || '')); return WIN ? n.toLowerCase() : n; };
+/** True when `cwd` is inside one of this window's workspace folders. */
+const inThisWindow = (cwd) => (vscode.workspace.workspaceFolders || []).some((f) => { const a = norm(cwd), b = norm(f.uri.fsPath); return a === b || a.startsWith(b + path.sep); });
 
 /** POSIX single-quoting: safe to paste into a shell whatever the text contains. */
 const shq = (s) => `'${String(s).replace(/'/g, `'\\''`)}'`;
 const ID_RE = /^[\w-]{8,64}$/;
 /** `cd <dir> && claude --resume <id>`, or null when the id is not a plain session id. */
-const resumeCommand = (cwd, id) => (ID_RE.test(id) ? (cwd ? `cd ${shq(cwd)} && ` : '') + `claude --resume ${id}` : null);
+/** PowerShell single-quoting (a quote is doubled). */
+const psq = (s) => `'${String(s).replace(/'/g, "''")}'`;
+/** `cd <dir> && claude --resume <id>` for the platform's default shell, or null when the id is not a plain session id. */
+const resumeCommand = (cwd, id) => (!ID_RE.test(id) ? null : WIN ? (cwd ? `cd ${psq(cwd)}; ` : '') + `claude --resume ${id}` : (cwd ? `cd ${shq(cwd)} && ` : '') + `claude --resume ${id}`);
 
 /**
  * Reveals a session. One started in this window's VS Code extension opens (or focuses) its Claude tab via
@@ -31,14 +38,16 @@ const resumeCommand = (cwd, id) => (ID_RE.test(id) ? (cwd ? `cd ${shq(cwd)} && `
  * folder again reloads the window, restarting Claude Code.
  */
 function showSession(s) {
-  const here = (vscode.workspace.workspaceFolders || []).some((f) => s.cwd === f.uri.fsPath || s.cwd.startsWith(f.uri.fsPath + path.sep));
+  const here = inThisWindow(s.cwd);
   if (here && /vscode/i.test(s.entrypoint)) {
     vscode.commands.executeCommand('claude-vscode.primaryEditor.open', s.id)
       .then(undefined, (e) => vscode.window.showWarningMessage(`Could not open the session: ${e?.message || e}`));
     return;
   }
   if (here) { vscode.window.showInformationMessage(`This session runs in a terminal (${s.entrypoint || 'CLI'}), not in a Claude tab.`); return; }
-  if (s.cwd && fs.existsSync(s.cwd) && fs.existsSync(CODE_CLI)) execFile(CODE_CLI, [s.cwd], () => {});
+  // Another folder: open it (VS Code focuses the window that already has it). Never for this window's own folder,
+  // which would reload the window and restart Claude Code.
+  if (s.cwd && fs.existsSync(s.cwd)) vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(s.cwd), { forceNewWindow: true });
 }
 
 /** Opens the file's change against git when the git extension can, else the file itself. */
@@ -127,7 +136,14 @@ function activate(ctx) {
   bar.show();
   ctx.subscriptions.push(bar);
 
-  const ding = () => { if (process.platform === 'darwin' && cfg().get('sound', true)) execFile('afplay', ['/System/Library/Sounds/Glass.aiff'], () => {}); };
+  /** A short system sound on each platform; silently skipped where no player exists. */
+  const ding = () => {
+    if (!cfg().get('sound', true)) return;
+    const quiet = () => {};
+    if (process.platform === 'darwin') execFile('afplay', ['/System/Library/Sounds/Glass.aiff'], quiet);
+    else if (WIN) execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', '[System.Media.SystemSounds]::Asterisk.Play()'], { windowsHide: true }, quiet);
+    else execFile('paplay', ['/usr/share/sounds/freedesktop/stereo/bell.oga'], (err) => { if (err) execFile('canberra-gtk-play', ['-i', 'bell'], quiet); });
+  };
 
   /** New Notification-hook events since the last tick; events from before startup are skipped. */
   const readEvents = () => {
@@ -358,7 +374,7 @@ function activate(ctx) {
     const t = stats?.days?.[stats.days.length - 1];
     const alerts = [];
     for (const x of last.sessions) if (x.needs) alerts.push({ kind: '', text: `${x.title || x.project}: ${x.needs}` });
-    if (sys?.level === 'bad') alerts.push({ kind: 'bad', text: 'Mac under pressure: check disk, memory and agents.' });
+    if (sys?.level === 'bad') alerts.push({ kind: 'bad', text: 'Machine under pressure: check disk, memory and agents.' });
     return {
       at: Date.now(), sessions: last.sessions.map(sess), recent: (last.recent || []).map((r) => ({ id: r.id, title: oneLine(r.title || r.prompt || 'Untitled session').slice(0, 160), project: r.project, lastTs: r.lastTs, lastPrompt: trim(oneLine(r.lastPrompt), 200) })),
       system: sys ? { cpu: sys.cpuPct ?? sys.load, cpuLevel: lvl(sys.cpu), memUsed: sys.memUsedGb, memLevel: lvl(sys.mem), disk: sys.diskFreeGb ?? 0, diskLevel: lvl(sys.disk), swap: sys.swapUsedGb ?? 0, swapLevel: lvl(sys.swap), agents: sys.agents, cap: sys.cap, agLevel: lvl(sys.ag), claude: sys.procs.claude.n } : null,
@@ -403,7 +419,10 @@ function activate(ctx) {
     if (!cwd || !fs.existsSync(cwd)) { vscode.window.showWarningMessage('The session folder no longer exists.'); return; }
     const term = vscode.window.createTerminal({ name: `Claude on phone · ${name}`.slice(0, 60), cwd });
     term.show();
-    term.sendText(['claude', ...args].map((a) => (/^[\w@%+=:,./-]+$/.test(a) ? a : `'${a.replace(/'/g, `'\\''`)}'`)).join(' '));
+    // Every argument is a session id or a name limited to [\w .-], so plain double quotes are safe in bash, zsh,
+    // PowerShell and cmd alike; the folder is the terminal's cwd, never part of the command line.
+    if (!args.every((a) => /^[\w .-]+$/.test(a))) return;
+    term.sendText(['claude', ...args].map((a) => (/\s/.test(a) ? `"${a}"` : a)).join(' '));
   };
 
   const fast = setInterval(tick, 2000);
@@ -485,7 +504,7 @@ function activate(ctx) {
       if (typeof m?.openUrl === 'string' && /^https:\/\/(github\.com|dev\.azure\.com|[\w-]+\.visualstudio\.com)\//.test(m.openUrl)) vscode.env.openExternal(vscode.Uri.parse(m.openUrl));
       if (typeof m?.reply === 'string' && typeof m.text === 'string' && m.text.trim() && m.text.length <= 8000) {
         const target = last.sessions.find((x) => x.id === m.reply) || (last.recent || []).find((x) => x.id === m.reply);
-        const here = target && (vscode.workspace.workspaceFolders || []).some((f) => target.cwd === f.uri.fsPath || target.cwd.startsWith(f.uri.fsPath + path.sep));
+        const here = target && inThisWindow(target.cwd);
         // Claude only fills in text for a session whose tab is not open yet ("Session is already open…"), so the
         // reply is always on the clipboard as well: paste it if Claude did not.
         vscode.env.clipboard.writeText(m.text);
@@ -496,7 +515,7 @@ function activate(ctx) {
           const claudeTabs = vscode.window.tabGroups.all.flatMap((g) => g.tabs).filter((t) => t.input instanceof vscode.TabInputWebview && /claude/i.test(t.input.viewType));
           const tabOpen = !!title && claudeTabs.some((t) => { const l = t.label.replace(/…$/, '').trim(); return l && (l === title || title.startsWith(l) || l.startsWith(title)); });
           vscode.commands.executeCommand('claude-vscode.primaryEditor.open', target.id, tabOpen ? undefined : m.text).then(undefined, () => {});
-          if (tabOpen) vscode.window.showInformationMessage('Your reply is copied. Claude cannot fill in a tab that is already open: click its input, press ⌘V, then Enter.');
+          if (tabOpen) vscode.window.showInformationMessage('Your reply is copied. Claude cannot fill in a tab that is already open: click its input, paste (' + (process.platform === 'darwin' ? '⌘V' : 'Ctrl+V') + '), then Enter.');
           else vscode.window.setStatusBarMessage('$(clippy) Reply filled in (also copied): press Enter in Claude to send', 6000);
         }
         else { vscode.env.clipboard.writeText(m.text); vscode.window.showInformationMessage('That session runs elsewhere; your reply is copied. Paste it there.'); if (target) showSession(target); }

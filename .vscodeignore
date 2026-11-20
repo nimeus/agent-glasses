@@ -1,5 +1,9 @@
 *.vsix
 .git/**
+.github/**
+.vscode/**
 docs/**
-scripts/**
+scripts/check.mjs
+tests/**
 .gitignore
+CONTRIBUTING.md

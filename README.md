@@ -7,7 +7,8 @@ another device on your Wi-Fi.
 
 > Unofficial. Not affiliated with or endorsed by Anthropic.
 
-Claude Viz reads the files Claude Code already writes on your Mac (`~/.claude/projects/**`). It sends
+Claude Viz reads the files Claude Code already writes on your computer (`~/.claude/projects/**`). It runs
+on macOS, Windows and Linux. It sends
 nothing anywhere: no telemetry, no network calls, except the optional phone page, which serves your own
 devices on your own network.
 
@@ -23,6 +24,7 @@ devices on your own network.
 - [Limitations](#limitations)
 - [Troubleshooting](#troubleshooting)
 - [Development](#development)
+- [Contributing](#contributing)
 - [License](#license)
 
 ## What you get
@@ -90,20 +92,52 @@ worktrees, never with `--force`), hook errors, and [phone access](#phone-access)
 
 ## Install
 
-Requirements: macOS, VS Code 1.90+, Claude Code (CLI or the VS Code extension), Node.js 20+ to build.
+Requirements: VS Code 1.90 or later, and Claude Code (the CLI or the VS Code extension).
+
+### From a release (recommended)
+
+1. Download `claude-viz-<version>.vsix` from the
+   [latest release](https://github.com/nimeus/claude-viz/releases/latest).
+2. Install it, either:
+   - in VS Code: **Extensions** view → `⋯` menu → **Install from VSIX…** → pick the file; or
+   - in a terminal: `code --install-extension claude-viz-<version>.vsix`
+3. Reload VS Code (**Developer: Reload Window**). The Claude Viz icon appears in the Activity Bar.
+
+The same file works on macOS, Windows and Linux. To update, install the newer `.vsix` the same way.
+
+### From source
+
+Needs Node.js 20 or later and git.
 
 ```bash
 git clone https://github.com/nimeus/claude-viz.git
 cd claude-viz
 npm ci
-npx @vscode/vsce package --allow-missing-repository
+npm run package          # writes claude-viz-<version>.vsix
 code --install-extension claude-viz-*.vsix
 ```
 
-Reload VS Code (**Developer: Reload Window**). The Claude Viz icon appears in the Activity Bar.
+On Windows PowerShell, use the full file name instead of `claude-viz-*.vsix`.
+
+If `code` is not found: in VS Code run **Shell Command: Install 'code' command in PATH** (macOS), or
+reinstall VS Code with "Add to PATH" checked (Windows).
 
 Live sessions, Today, History and insights work right away from the transcripts. Two optional pieces add
 more.
+
+### Platform support
+
+| | macOS | Windows | Linux |
+|---|---|---|---|
+| Sessions, costs, insights, history, search | ✓ | ✓ | ✓ |
+| Machine strip: CPU, memory, disk, processes | ✓ | ✓ | ✓ |
+| Swap | ✓ | – (not shown) | ✓ |
+| Alert sound | `afplay` | PowerShell | `paplay` or `canberra-gtk-play` |
+| Phone access | ✓ | ✓ | ✓ |
+| Copied `claude --resume` command | zsh/bash | PowerShell | bash |
+
+Day-to-day use is on macOS. Windows and Linux support is written and unit-tested with sample data but has
+had little real-world use, so please [report problems](https://github.com/nimeus/claude-viz/issues).
 
 ## Optional setup
 
@@ -112,7 +146,17 @@ Both go in `~/.claude/settings.json`. Back the file up first.
 ### Needs-you alerts (Notification hook)
 
 Lets Claude Viz alert you (notification, sound, yellow status bar) when a session asks for permission or
-waits for input. Add a `Notification` hook that appends each event to a file Claude Viz watches:
+waits for input. Copy the included script, which appends each event to a file Claude Viz watches:
+
+```bash
+mkdir -p ~/.claude/claude-viz
+cp scripts/notify-hook.mjs ~/.claude/claude-viz/notify-hook.mjs
+```
+
+(On Windows: `mkdir %USERPROFILE%\.claude\claude-viz` and copy the file there. If you installed from a
+release, download `notify-hook.mjs` and `statusline.mjs` from the repository's `scripts/` folder.)
+
+Then register it:
 
 ```json
 {
@@ -120,10 +164,7 @@ waits for input. Add a `Notification` hook that appends each event to a file Cla
     "Notification": [
       {
         "hooks": [
-          {
-            "type": "command",
-            "command": "mkdir -p ~/.claude/claude-viz && { cat; echo; } >> ~/.claude/claude-viz/events.jsonl"
-          }
+          { "type": "command", "command": "node ~/.claude/claude-viz/notify-hook.mjs" }
         ]
       }
     ]
@@ -160,7 +201,7 @@ A read-only copy of the panel for your phone, served by the extension on your Wi
 1. In **System → Phone access**, press **Turn on** (or run **Claude Viz: Turn Phone Access On/Off**).
 2. Press **Pair a device** and scan the QR code with your phone's camera.
 3. Your phone warns that the certificate is not trusted, because it is a self-made certificate for this
-   Mac. Check that its fingerprint matches the one shown in VS Code, then continue.
+   computer. Check that its fingerprint matches the one shown in VS Code, then continue.
 4. Tap **Pair this phone**. The phone now has its own key and can open the page until you revoke it.
 
 The phone shows Live (with the same detail as the panel), Today and History, and each session's
@@ -169,9 +210,9 @@ prompts, tools and subagents. It refreshes every 3 seconds while open.
 How it is protected (details in [docs/SECURITY.md](docs/SECURITY.md)):
 
 - Off by default; turns itself off after 4 hours (`claudeViz.phone.autoOffHours`).
-- Listens only on your Mac's private Wi-Fi/Ethernet addresses: not on localhost, a VPN tunnel or
+- Listens only on your computer's private Wi-Fi/Ethernet addresses: not on localhost, a VPN tunnel or
   `0.0.0.0`.
-- HTTPS with a certificate made on your Mac.
+- HTTPS with a certificate made on your computer.
 - Pairing codes work once and expire after 10 minutes. Each paired device gets its own random key; only
   its hash is stored. Devices can be revoked one by one.
 - Read-only: no endpoint can change anything. Failed attempts are rate-limited.
@@ -189,7 +230,7 @@ and approve tools.
 | Setting | Default | What it does |
 |---|---|---|
 | `claudeViz.notifyOnFinish` | `true` | Notify when a session finishes its turn. |
-| `claudeViz.sound` | `true` | Play a sound (macOS) when a session needs you. |
+| `claudeViz.sound` | `true` | Play a sound when a session needs you. |
 | `claudeViz.celebrate` | `true` | Brief message when a commit lands, tests turn green again, a subagent finishes cleanly or you earn an achievement. |
 | `claudeViz.contextWindow` | `1000000` | Context window size the context gauge measures against. |
 | `claudeViz.diskWarnGb` | `30` | Warn below this much free disk (red below two thirds of it). |
@@ -225,8 +266,8 @@ and approve tools.
 ## Privacy and security
 
 - Everything stays on your machine. Claude Viz reads `~/.claude/projects/**`, `~/.claude/settings.json`
-  and its own folder `~/.claude/claude-viz/`, and runs local commands such as `git`, `ps`, `vm_stat` and
-  `sysctl`.
+  and its own folder `~/.claude/claude-viz/`, and runs local commands such as `git`, `ps`/`tasklist`, `vm_stat` and
+  `sysctl` (macOS).
 - It writes only to `~/.claude/claude-viz/` (archive, phone keys, events), and to Claude Code settings
   when you confirm an allow rule from the Unblock coach (a backup is kept beside the file).
 - The panel renders transcript text as text, never as HTML. Secret-looking strings (API keys, bearer
@@ -235,7 +276,8 @@ and approve tools.
 
 ## Limitations
 
-- macOS only for now (process, memory and swap readings use macOS tools; the rest is portable).
+- Windows and Linux have had little real-world use (see [Platform support](#platform-support)). Swap is
+  not shown on Windows.
 - The panel cannot type into a Claude tab that is already open, and cannot approve permission prompts:
   Claude Code exposes no API for either.
 - Very long transcripts (over 20 MB) are read from their last 20 MB for daily statistics, so older days
@@ -246,11 +288,12 @@ and approve tools.
 
 | Symptom | Fix |
 |---|---|
-| Panel looks unchanged after an update | Reload the window; if it persists, quit VS Code (⌘Q) and reopen. |
+| Panel looks unchanged after an update | Reload the window; if it persists, quit VS Code completely and reopen. |
 | Limits say "est." | Set up the [status line](#plan-usage-status-line) and start a new Claude Code session. |
 | No needs-you alerts | Add the [Notification hook](#needs-you-alerts-notification-hook); it applies to new sessions. |
 | Phone: "Pairing code not valid" | Press **New code** in VS Code and scan again. The reason is logged in **Output → Claude Viz Phone**. |
 | Phone access won't start | Connect to Wi-Fi or Ethernet; if the port is taken, change `claudeViz.phone.port`. |
+| Phone can't reach the page (Windows/Linux) | Allow the port (default 7843) in the firewall for private networks only. |
 
 ## Development
 
@@ -259,21 +302,28 @@ extension.js            VS Code wiring: panels, status bar, alerts, messages fro
 lib/data.js             transcript reading: live snapshot, 14-day statistics, search, history
 lib/session-insight.js  full analysis of one session (streamed)
 lib/insights.js         unblock coach, achievements, recap, attribution, budget, weekly estimate
-lib/system.js           machine readings
+lib/system.js           machine readings (macOS, Linux, Windows)
 lib/worktrees.js        git worktree scan and safe removal
 lib/git.js              commits during a session, pull request lookup
 lib/search.js           full-text search across transcripts
 lib/export.js           Markdown/CSV/JSON exports
 lib/archive.js          summaries kept after transcript cleanup
 lib/phone.js            phone access server (HTTPS, pairing, devices)
+lib/cert.js             self-signed certificate in pure Node
 media/view.js, .css     the panel (plain DOM, no framework)
 media/phone/            the phone page
-scripts/statusline.mjs  status-line script for plan usage
+scripts/                status-line and Notification-hook scripts, source check
+tests/                  node:test tests
 ```
 
-There is no build step and one runtime dependency (`qrcode-generator`). After a change, package and
-reinstall as in [Install](#install), bumping the version in `package.json` each time so VS Code loads
-the new copy. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how data flows.
+There is no build step and one runtime dependency (`qrcode-generator`). Open the folder in VS Code and
+press **F5** to run it in an Extension Development Host. `npm run check` syntax-checks every file and
+`npm test` runs the tests. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how data flows.
+
+## Contributing
+
+Bug reports, fixes and ideas are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) for setup, testing and
+what a pull request needs. Security problems: see [docs/SECURITY.md](docs/SECURITY.md#reporting).
 
 ## License
 

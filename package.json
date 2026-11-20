@@ -1,7 +1,7 @@
 {
   "name": "claude-viz",
   "displayName": "Claude Viz",
-  "version": "0.9.4",
+  "version": "0.10.0",
   "publisher": "local",
   "engines": {
     "vscode": "^1.90.0"
@@ -36,7 +36,7 @@
         "claudeViz.sound": {
           "type": "boolean",
           "default": true,
-          "description": "Play a sound (macOS) when a Claude Code session needs your permission or input."
+          "description": "Play a sound when a Claude Code session needs your permission or input."
         },
         "claudeViz.contextWindow": {
           "type": "number",
@@ -127,5 +127,10 @@
   "categories": [
     "Visualization",
     "Other"
-  ]
+  ],
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "test": "node --test tests/*.test.cjs",
+    "package": "npx @vscode/vsce package --allow-missing-repository"
+  }
 }

@@ -1,0 +1,39 @@
+name: Bug report
+description: Something shows the wrong thing, breaks or crashes.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Please don't paste transcript content, API keys or phone keys. Security problems go through private reporting (Security tab).
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected instead. A screenshot helps.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to reproduce
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [macOS, Windows, Linux]
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Claude Viz, VS Code and Claude Code versions.
+      placeholder: Claude Viz 0.10.0, VS Code 1.106, Claude Code 2.3
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Anything relevant from Help → Toggle Developer Tools → Console, or Output → Claude Viz Phone.
+      render: text

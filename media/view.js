@@ -177,8 +177,8 @@
     const tile = (label, value, sub, level, graph, title) => { const t = el('div', 'mt ' + level); t.title = title || ''; t.append(el('span', 'kl', label), el('b', 'num', value)); t.append(graph || el('span', 'ms', sub || '\u00a0')); return t; };
     strip.append(
       tile('CPU', s.cpuPct != null ? pct(s.cpuPct) : pct(s.load), null, s.cpu, line(s.hist && s.hist.cpu, s.cpu), s.cores + ' cores; load average ' + s.load.toFixed(2) + ' per core'),
-      tile('Memory', gb(s.memUsedGb), null, s.mem, line(s.hist && s.hist.mem, s.mem), gb(s.memUsedGb) + ' of ' + Math.round(s.memTotalGb) + ' GB used' + (s.compressedGb ? ', ' + gb(s.compressedGb) + ' compressed' : '') + (s.memFreePct != null ? '. macOS reports ' + s.memFreePct + '% available.' : '')),
-      tile('Swap', s.swapUsedGb != null ? gb(s.swapUsedGb) : '–', s.swapTotalGb ? 'of ' + gb(s.swapTotalGb) : '', s.swap, null, 'Swap grows when memory runs short; with a nearly full disk it can hang the Mac.'),
+      tile('Memory', gb(s.memUsedGb), null, s.mem, line(s.hist && s.hist.mem, s.mem), gb(s.memUsedGb) + ' of ' + Math.round(s.memTotalGb) + ' GB used' + (s.compressedGb ? ', ' + gb(s.compressedGb) + ' compressed' : '') + (s.memFreePct != null ? '. ' + s.memFreePct + '% available.' : '')),
+      tile('Swap', s.swapUsedGb != null ? gb(s.swapUsedGb) : '–', s.swapTotalGb ? 'of ' + gb(s.swapTotalGb) : '', s.swap, null, 'Swap grows when memory runs short; with a nearly full disk it can hang the machine.'),
       tile('Disk free', s.diskFreeGb != null ? gb(s.diskFreeGb) : '–', s.diskTotalGb ? 'of ' + gb(s.diskTotalGb) : '', s.disk, null, 'Keep at least ' + s.diskWarnGb + ' GB free'),
       tile('Claude', s.procs.claude.n + ' procs', gb(s.procs.claude.gb), 'ok', null, s.procs.claude.n + ' Claude Code processes using ' + gb(s.procs.claude.gb) + '; ' + s.procs.node.n + ' Node processes using ' + gb(s.procs.node.gb)),
       tile('Agents', s.agents + ' / ' + s.cap, 'subagents', s.ag, null, 'Subagents running now, out of CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS'));
@@ -704,7 +704,7 @@
         box.append(qrSvg(pairing.matrix));
         const t = el('div', 'pt');
         const left = el('span', 'dim small num'); left.dataset.until = pairing.expires; left.dataset.kind = 'expires';
-        t.append(el('b', null, 'Scan with your phone’s camera'), left, el('span', 'dim small', 'Then accept the certificate warning (it is made for this Mac: the fingerprint starts with ' + pairing.fingerprint.slice(0, 23) + ') and tap “Pair this phone”. The code works once.'));
+        t.append(el('b', null, 'Scan with your phone’s camera'), left, el('span', 'dim small', 'Then accept the certificate warning (it is made on this computer: the fingerprint starts with ' + pairing.fingerprint.slice(0, 23) + ') and tap “Pair this phone”. The code works once.'));
         const acts2 = el('div', 'acts'); acts2.append(button('New code', 'btn small ghost', 'Replaces this code', () => vscode.postMessage({ phonePair: true })), button('Cancel', 'btn small ghost', null, () => { pairing = null; render0(); })); t.append(acts2);
         box.append(t); c.append(box);
       } else c.append(button('Pair a device', 'btn small', 'Shows a one-time QR code (valid 10 minutes)', () => vscode.postMessage({ phonePair: true })));
@@ -927,7 +927,7 @@
     view.append(bar2);
     // Full-text search inside every transcript, on demand (it reads ~all transcripts on disk).
     const fts = el('div', 'acts');
-    fts.append(button(fullBusy ? 'Searching all transcripts…' : 'Search inside all transcripts' + (q.trim().length >= 3 ? ' for “' + q.trim() + '”' : ''), 'btn small', 'Looks through every prompt, reply and tool output on this Mac', () => { if (q.trim().length < 3 || fullBusy) return; fullBusy = true; fullText = null; render0(); vscode.postMessage({ fulltext: q.trim() }); }));
+    fts.append(button(fullBusy ? 'Searching all transcripts…' : 'Search inside all transcripts' + (q.trim().length >= 3 ? ' for “' + q.trim() + '”' : ''), 'btn small', 'Looks through every prompt, reply and tool output on this computer', () => { if (q.trim().length < 3 || fullBusy) return; fullBusy = true; fullText = null; render0(); vscode.postMessage({ fulltext: q.trim() }); }));
     view.append(fts);
     if (fullText) {
       const fc = card('Found inside transcripts', fullText.total ? fullText.total + ' session' + (fullText.total === 1 ? '' : 's') + ' mention “' + fullText.q + '”' : (fullText.note || 'No transcript mentions “' + fullText.q + '”'));

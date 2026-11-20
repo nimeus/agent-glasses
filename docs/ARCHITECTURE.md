@@ -26,7 +26,7 @@ flowchart LR
 | 5 s | `system.machine()`: CPU, memory, swap, disk, processes. |
 | 30 s | `data.stats()`: incremental 14-day statistics (only new bytes are read), then the coach, achievements, recap, attribution, budget, weekly estimate; archive the day totals. |
 | 10 min | Worktree scan (sizes via `du`). |
-| On demand | Session insights (whole transcript, streamed), history list, full-text search (`grep`), git view, exports. |
+| On demand | Session insights (whole transcript, streamed), history list, full-text search (a streaming scan in Node), git view, exports. |
 
 ## Transcript facts the code relies on
 

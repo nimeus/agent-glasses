@@ -12,13 +12,13 @@ reads them locally and never sends them off the machine, with one exception you 
 | Threat | Mitigation |
 |---|---|
 | Someone else on the Wi-Fi opens the page | Every request needs a paired device's key; unpaired requests get a 401 with no data. |
-| Pairing code is seen or guessed | 192-bit random code, single use, expires after 10 minutes; checked in constant time. Opening the link only shows a confirmation; the code is used up by tapping **Pair**. |
+| Pairing code is seen or guessed | 192-bit random code, single use, expires after 10 minutes; checked in constant time. Opening the link only shows a confirmation; the code is used up by tapping **Pair**. Reopening a used link redirects to the main page, which still requires a key. |
 | A device key is stolen from the server | Only SHA-256 hashes of keys are stored (`~/.claude/claude-viz/phone/devices.json`, mode 600). |
 | A lost phone keeps access | Revoke it in **System → Phone access**; its next request gets a 401. |
-| Traffic is read on the network | HTTPS (TLS 1.2+) with an RSA-2048 certificate made on the Mac (key file mode 600). Compare the fingerprint shown in VS Code with the one your phone shows when you first connect. |
+| Traffic is read on the network | HTTPS (TLS 1.2+) with an RSA-2048 certificate made by the extension itself in Node, with no external tools (key file mode 600). Compare the fingerprint shown in VS Code with the one your phone shows when you first connect. |
 | Brute force | 10 failed attempts from one address block it for 10 minutes. |
 | The service is left running | Off by default; turns itself off after `claudeViz.phone.autoOffHours` (default 4). |
-| Exposure beyond the LAN | Binds only to private IPv4 addresses (10/8, 172.16/12, 192.168/16) on `en*`/`eth*`/`wlan*` interfaces; never `0.0.0.0`, localhost or VPN tunnels. Nothing is forwarded to the internet. |
+| Exposure beyond the LAN | Binds only to private IPv4 addresses (10/8, 172.16/12, 192.168/16) on physical interfaces; loopback, VPN, virtual-machine and container adapters are skipped (macOS, Linux and Windows names). Never `0.0.0.0`. On Windows and Linux, allow the port in the firewall for private networks only. Nothing is forwarded to the internet. |
 | The page is abused to change things | GET only (others get 405); the API has no write endpoints. |
 | Cross-site attacks against the page | Key cookie is `HttpOnly; Secure; SameSite=Strict`. Responses send a strict Content-Security-Policy (`default-src 'none'`, scripts only from the page itself), `X-Frame-Options: DENY`, `no-store`, `nosniff`, `no-referrer`. |
 | Transcript text runs as code on the phone | The phone page builds the DOM with `textContent` only; links open with `noopener`. |
@@ -44,4 +44,6 @@ can read the transcripts directly anyway.
 
 ## Reporting
 
-Please open a GitHub issue for anything you find, without including transcript content or keys.
+Please report vulnerabilities privately through GitHub's **Report a vulnerability** button on the
+repository's Security tab, not in a public issue. Do not include transcript content or keys. For anything
+that is not a vulnerability, open a normal issue.

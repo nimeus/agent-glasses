@@ -1,4 +1,4 @@
-// Claude Viz phone page: read-only. Polls the paired Mac every 3 s while visible; builds the DOM with
+// Claude Viz phone page: read-only. Polls the paired computer every 3 s while visible; builds the DOM with
 // createElement/textContent only, so transcript text can never run as code here.
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -112,7 +112,7 @@
   }
   function machine() {
     const s = state.system; if (!s) return null;
-    const c = el('section', 'card'); c.append(el('h2', null, 'Mac'));
+    const c = el('section', 'card'); c.append(el('h2', null, 'Machine'));
     const g = el('div', 'strip');
     g.append(stat('CPU', pct(s.cpu), s.cpuLevel), stat('Memory', s.memUsed.toFixed(1) + ' GB', s.memLevel), stat('Disk free', Math.round(s.disk) + ' GB', s.diskLevel), stat('Swap', s.swap.toFixed(1) + ' GB', s.swapLevel), stat('Agents', s.agents + ' / ' + s.cap, s.agLevel), stat('Claude', s.claude + ' procs'));
     c.append(g);

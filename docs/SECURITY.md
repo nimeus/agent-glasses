@@ -36,6 +36,11 @@ can read the transcripts directly anyway.
   unlocked, re-checks just before removing, and uses `git worktree remove` without `--force`; branches are
   kept.
 - Links in rendered Markdown open through VS Code, which asks before opening an external site.
+- **Git in session folders** (worktree scan, session git view): every automatic `git` call disables
+  `core.fsmonitor` and hooks, which a repository's own config could otherwise use to run programs. Filter
+  drivers defined in `.gitattributes` can still run during `git status`; the scans only touch folders where
+  you ran Claude Code yourself.
+- **Copied commands** (`claude --resume`) quote the folder for the shell and accept only plain session ids.
 
 ## Reporting
 

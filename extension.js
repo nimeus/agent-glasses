@@ -18,6 +18,12 @@ const phone = require('./lib/phone');
 
 const CODE_CLI = '/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code';
 
+/** POSIX single-quoting: safe to paste into a shell whatever the text contains. */
+const shq = (s) => `'${String(s).replace(/'/g, `'\\''`)}'`;
+const ID_RE = /^[\w-]{8,64}$/;
+/** `cd <dir> && claude --resume <id>`, or null when the id is not a plain session id. */
+const resumeCommand = (cwd, id) => (ID_RE.test(id) ? (cwd ? `cd ${shq(cwd)} && ` : '') + `claude --resume ${id}` : null);
+
 /**
  * Reveals a session. One started in this window's VS Code extension opens (or focuses) its Claude tab via
  * the extension's own command. Anything else only brings its folder's window to the front: resuming a
@@ -421,7 +427,7 @@ function activate(ctx) {
       if (typeof m?.sid === 'string' && m.act === 'unhide') { hidden.delete(m.sid); persist(); post(); }
       if (m?.hideAll) { for (const r of last.recent || []) hidden.set(r.id, Date.now()); persist(); post(); }
       if (sess && m.act === 'mute') { muted.has(sess.id) ? muted.delete(sess.id) : muted.add(sess.id); persist(); post(); }
-      if (sess && m.act === 'resume') { vscode.env.clipboard.writeText(`cd ${JSON.stringify(sess.cwd)} && claude --resume ${sess.id}`); vscode.window.setStatusBarMessage('Resume command copied', 3000); }
+      if (sess && m.act === 'resume') { const cmd = resumeCommand(sess.cwd, sess.id); if (cmd) { vscode.env.clipboard.writeText(cmd); vscode.window.setStatusBarMessage('Resume command copied', 3000); } }
       if (sess && m.act === 'transcript') vscode.window.showTextDocument(vscode.Uri.file(sess.file), { preview: true });
       if (sess && typeof m.tool === 'string') {
         const agent = m.aid ? sess.subs.find((a) => a.id === m.aid) : sess;
@@ -514,7 +520,7 @@ function activate(ctx) {
       if (typeof m?.openFileOf === 'string') { const f = sessionInsight.locate(m.openFileOf); if (f) vscode.window.showTextDocument(vscode.Uri.file(f), { preview: true }); }
       // Folder and entrypoint come from the analysis, never from the message.
       const known = typeof m?.copyResume === 'string' ? analyzed.get(m.copyResume) : typeof m?.showById === 'string' ? analyzed.get(m.showById) : null;
-      if (known && m.copyResume) { vscode.env.clipboard.writeText((known.cwd ? `cd ${JSON.stringify(known.cwd)} && ` : '') + `claude --resume ${m.copyResume}`); vscode.window.setStatusBarMessage('Resume command copied', 3000); }
+      if (known && m.copyResume) { const cmd = resumeCommand(known.cwd, m.copyResume); if (cmd) { vscode.env.clipboard.writeText(cmd); vscode.window.setStatusBarMessage('Resume command copied', 3000); } }
       if (known && m.showById) showSession({ id: m.showById, cwd: known.cwd || '', entrypoint: known.entrypoint || '' });
       if (typeof m?.rule === 'string') {
         const item = derived?.coach.items.find((g) => g.rule === m.rule);
